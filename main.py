@@ -1,9 +1,19 @@
 import time
 import subprocess
-import json
 import sys
-from utils.log import log_info, log_warning, log_error, log_success
 import os
+
+# Add script's directory to Python path (for embeddable Python compatibility)
+# This ensures utils/ and other modules can be found regardless of how Python is invoked
+if '__file__' in globals():
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+else:
+    # Fallback: use current working directory or sys.argv[0] if available
+    script_dir = os.path.dirname(os.path.abspath(sys.argv[0])) if sys.argv else os.getcwd()
+if script_dir and script_dir not in sys.path:
+    sys.path.insert(0, script_dir)
+
+from utils.log import log_info, log_warning, log_error, log_success
 
 # Fix Windows console encoding for Unicode support
 if os.name == 'nt':  # Windows
@@ -17,16 +27,37 @@ if os.name == 'nt':  # Windows
         pass
 
 from utils.screenshot import get_screen_size, load_config
-from utils.device import run_adb
-from core.execute import career_lobby
+from utils.config_loader import load_main_config
+
+# Load full config to determine mode
+def load_full_config():
+    """Load full configuration from config.json"""
+    try:
+        return load_main_config()
+    except Exception as e:
+        log_error(f"Error loading config: {e}")
+        return {}
+
+config = load_full_config()
+mode = config.get("mode", "ura").lower()
+
+# Import the appropriate execute module based on mode
+if mode == "unity":
+    from core.Unity.execute import career_lobby
+    mode_name = "Unity Cup"
+else:
+    from core.Ura.execute import career_lobby
+    mode_name = "URA"
+
+from utils.device import run_adb, _get_adb_path
 
 # Logging is now handled by utils.log module
 
 def check_adb_connection():
     """Check if ADB is connected to a device"""
-    config = load_config()
-    adb_path = config.get('adb_path', 'adb')
-    device_address = config.get('device_address', '')
+    adb_config = load_config()  # This returns adb_config section
+    adb_path = _get_adb_path()  # Use the function that finds bundled ADB
+    device_address = adb_config.get('device_address', '')
     
     try:
         result = subprocess.run([adb_path, 'devices'], capture_output=True, text=True, check=True)
@@ -101,8 +132,9 @@ def get_device_info():
         return False
 
 def main():
-    log_info("Uma Auto - ADB Version!")
+    log_info(f"Uma Auto - {mode_name} Version!")
     log_info("=" * 40)
+    log_info(f"Mode: {mode.upper()}")
     
     # Check ADB connection
     if not check_adb_connection():
@@ -114,7 +146,10 @@ def main():
     
     log_info("")
     log_success("Starting automation...")
-    log_info("Make sure Umamusume is running on your device!")
+    if mode == "unity":
+        log_info("Make sure Umamusume Unity Cup is running on your device!")
+    else:
+        log_info("Make sure Umamusume is running on your device!")
     log_info("Press Ctrl+C to stop the automation.")
     log_info("=" * 40)
     
@@ -128,4 +163,4 @@ def main():
         log_error("Automation error: " + str(e))
 
 if __name__ == "__main__":
-    main() 
+    main()

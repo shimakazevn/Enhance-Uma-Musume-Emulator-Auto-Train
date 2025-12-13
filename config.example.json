@@ -1,44 +1,5 @@
 {
-  "priority_stat": [
-    "spd",
-    "sta",
-    "wit",
-    "pwr",
-    "guts"
-  ],
-  "minimum_mood": "GREAT",
-  "maximum_failure": 15,
-  "allowed_grades": [
-    "G1",
-    "G2"
-  ],
-  "allowed_tracks": [
-    "Turf"
-  ],
-  "allowed_distances": [
-    "Medium",
-    "Long"
-  ],
-  "strategy": "FRONT",
-  "retry_race": true,
-  "do_custom_race": true,
-  "custom_race_file": "custom_races.json",
-  "skill_point_cap": 400,
-  "skill_purchase": "auto",
-  "skill_file": "skills_example.json",
-  "enable_skill_point_check": true,
-  "min_energy": 30,
-  "min_score": 1.0,
-  "min_wit_score": 1.0,
-  "do_race_when_bad_training": false,
-  "stat_caps": {
-    "spd": 1100,
-    "sta": 850,
-    "pwr": 600,
-    "guts": 600,
-    "wit": 600
-  },
-  "capture_method": "nemu_ipc",
+  "capture_method": "adb",
   "adb_config": {
     "device_address": "127.0.0.1:16448",
     "adb_path": "adb",
@@ -52,8 +13,68 @@
     "display_id": 0,
     "timeout": 1.0
   },
+  "ldopengl_config": {
+    "ld_folder": "J:\\LDPlayer\\LDPlayer9",
+    "instance_id": 0,
+    "orientation": 0
+  },
+  "training": {
+    "priority_stat": [
+      "spd",
+      "sta",
+      "wit",
+      "pwr",
+      "guts"
+    ],
+    "minimum_mood": "GREAT",
+    "maximum_failure": 15,
+    "min_energy": 30,
+    "min_score": {
+      "spd": 1.0,
+      "sta": 1.0,
+      "pwr": 1.0,
+      "guts": 1.0,
+      "wit": 1.0
+    },
+    "do_race_when_bad_training": false,
+    "spirit_burst_enabled_stats": [
+      "spd",
+      "sta",
+      "pwr"
+    ],
+    "stat_caps": {
+      "spd": 1100,
+      "sta": 850,
+      "pwr": 600,
+      "guts": 600,
+      "wit": 600
+    }
+  },
+  "racing": {
+    "strategy": "FRONT",
+    "retry_race": true,
+    "allowed_grades": [
+      "G1",
+      "G2"
+    ],
+    "allowed_tracks": [
+      "Turf"
+    ],
+    "allowed_distances": [
+      "Medium",
+      "Long"
+    ],
+    "do_custom_race": true,
+    "custom_race_file": "template/races/custom_races.json"
+  },
+  "skills": {
+    "skill_point_cap": 400,
+    "skill_purchase": "auto",
+    "skill_file": "template/skills/skills.json",
+    "enable_skill_point_check": true
+  },
   "restart_career": {
-    "restart_enabled": true,
+    "restart_enabled": false,
     "restart_times": 2,
     "total_fans_requirement": 0
   },
@@ -63,6 +84,16 @@
     "support_rarity": "SSR",
     "auto_charge_tp": true
   },
+  "dating": {
+    "use_dating_instead_of_rest": false
+  },
+  "mode": "ura",
   "debug_mode": false,
-  "stop_on_event_detection_failure": false
+  "stop_on_event_detection_failure": false,
+  "update": {
+    "auto_update": true,
+    "install_dependencies": true,
+    "branch": "main",
+    "remote": "origin"
+  }
 }

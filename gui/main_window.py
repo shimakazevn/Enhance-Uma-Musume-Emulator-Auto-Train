@@ -5,14 +5,6 @@ import json
 import os
 from datetime import datetime
 
-# Import centralized font management
-try:
-    from .font_manager import get_font_manager, get_font
-    from .font_config_editor import open_font_editor
-except ImportError:
-    from font_manager import get_font_manager, get_font
-    from font_config_editor import open_font_editor
-
 try:
     from .config_panel import ConfigPanel
     from .status_panel import StatusPanel
@@ -27,9 +19,10 @@ except ImportError:
 class MainWindow:
     def __init__(self, root):
         self.root = root
-        self.root.title("Uma Musume Auto-Train Bot")
+        self.root.title("Uma Musume Auto Train")
         self.root.geometry("1400x900")
         self.root.minsize(1200, 800)
+        self.set_app_icon()
 
         # Set customtkinter appearance mode and color theme
         ctk.set_appearance_mode("dark")  # "dark" or "light"
@@ -63,48 +56,12 @@ class MainWindow:
         
         # Load configuration
         self.load_config()
-        
-        # Create menu bar
-        self.create_menu()
-        
+
         # Create GUI components
         self.create_widgets()
         
         # Initialize bot controller
         self.bot_controller = BotController(self)
-    
-    def create_menu(self):
-        """Create menu bar with font configuration option"""
-        try:
-            # Create menu bar
-            menubar = tk.Menu(self.root, bg=self.colors['bg_medium'], fg=self.colors['text_light'])
-            self.root.config(menu=menubar)
-            
-            # Settings menu
-            settings_menu = tk.Menu(menubar, tearoff=0, bg=self.colors['bg_medium'], fg=self.colors['text_light'])
-            menubar.add_cascade(label="Settings", menu=settings_menu)
-            settings_menu.add_command(label="Font Configuration...", command=self.open_font_config)
-            settings_menu.add_separator()
-            settings_menu.add_command(label="Reload Fonts", command=self.reload_fonts)
-            
-        except Exception as e:
-            print(f"Error creating menu: {e}")
-    
-    def open_font_config(self):
-        """Open the font configuration editor"""
-        try:
-            open_font_editor(self.root)
-        except Exception as e:
-            self.add_log(f"Error opening font editor: {e}", "error")
-    
-    def reload_fonts(self):
-        """Reload font configuration"""
-        try:
-            from font_manager import reload_fonts
-            reload_fonts()
-            self.add_log("Font configuration reloaded", "success")
-        except Exception as e:
-            self.add_log(f"Error reloading fonts: {e}", "error")
 
     def create_widgets(self):
         """Create the main layout with three main panels using modern customtkinter"""
@@ -163,27 +120,6 @@ class MainWindow:
     def get_default_config(self):
         """Get default configuration"""
         return {
-            "priority_stat": ["spd", "sta", "wit", "pwr", "guts"],
-            "minimum_mood": "GREAT",
-            "maximum_failure": 15,
-            "strategy": "PACE",
-
-            "retry_race": True,
-            "skill_point_cap": 400,
-            "skill_purchase": "auto",
-            "skill_file": "skills_example.json",
-            "enable_skill_point_check": True,
-            "min_energy": 30,
-            "min_score": 1.0,
-            "min_wit_score": 1.0,
-            "do_race_when_bad_training": True,
-            "stat_caps": {
-                "spd": 1100,
-                "sta": 1100,
-                "pwr": 600,
-                "guts": 600,
-                "wit": 600
-            },
             "capture_method": "adb",
             "adb_config": {
                 "device_address": "127.0.0.1:7555",
@@ -198,7 +134,60 @@ class MainWindow:
                 "display_id": 0,
                 "timeout": 1.0
             },
-            "debug_mode": False
+            "ldopengl_config": {
+                "ld_folder": "J:\\LDPlayer\\LDPlayer9",
+                "instance_id": 0,
+                "orientation": 0
+            },
+            "training": {
+                "priority_stat": ["spd", "sta", "wit", "pwr", "guts"],
+                "minimum_mood": "GREAT",
+                "maximum_failure": 15,
+                "min_energy": 30,
+                "min_score": {
+                    "spd": 1.0,
+                    "sta": 1.0,
+                    "pwr": 1.0,
+                    "guts": 1.0,
+                    "wit": 1.0
+                },
+                "do_race_when_bad_training": False,
+                "stat_caps": {
+                    "spd": 1100,
+                    "sta": 1100,
+                    "pwr": 600,
+                    "guts": 600,
+                    "wit": 600
+                }
+            },
+            "racing": {
+                "strategy": "FRONT",
+                "retry_race": True,
+                "allowed_grades": ["G1", "G2"],
+                "allowed_tracks": ["Turf"],
+                "allowed_distances": ["Medium", "Long"],
+                "do_custom_race": True,
+                "custom_race_file": "template/races/custom_races.json"
+            },
+            "skills": {
+                "skill_point_cap": 400,
+                "skill_purchase": "auto",
+                "skill_file": "template/skills/skills.json",
+                "enable_skill_point_check": True
+            },
+            "restart_career": {
+                "restart_enabled": True,
+                "restart_times": 2,
+                "total_fans_requirement": 0
+            },
+            "auto_start_career": {
+                "include_guests_legacy": False,
+                "support_speciality": "STA",
+                "support_rarity": "SSR",
+                "auto_charge_tp": True
+            },
+            "debug_mode": False,
+            "stop_on_event_detection_failure": False
         }
     
     def save_config(self):
@@ -288,10 +277,34 @@ class MainWindow:
         self.config[parent_key][child_key] = value
         self.schedule_auto_save()
 
+    def set_app_icon(self):
+        """Attempt to set a custom window icon if provided"""
+        # Look for user-provided icon files under assets/icons
+        gui_dir = os.path.normpath(os.path.dirname(__file__))
+        base_dir = os.path.normpath(os.path.join(gui_dir, ".."))
+        icon_candidates = [
+            os.path.join(gui_dir, "app.ico"),  # allow drop-in next to main_window
+            os.path.join(gui_dir, "app.png"),
+        ]
+
+        for icon_path in icon_candidates:
+            if not os.path.exists(icon_path):
+                continue
+            try:
+                if icon_path.lower().endswith(".ico"):
+                    self.root.iconbitmap(icon_path)
+                else:
+                    # Keep a reference so the image is not garbage-collected
+                    self._icon_image_ref = tk.PhotoImage(file=icon_path)
+                    self.root.iconphoto(False, self._icon_image_ref)
+                break
+            except Exception as e:
+                print(f"Warning: Could not set app icon: {e}")
+
 def main():
     """Main function to run the modern GUI"""
     root = ctk.CTk()
-    root.title("Uma Musume Auto-Train Bot")
+    root.title("Uma Musume Auto Train")
     app = MainWindow(root)
     
     # Handle window close
