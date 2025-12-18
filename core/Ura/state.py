@@ -5,13 +5,13 @@ import os
 
 from PIL import Image, ImageEnhance
 from utils.screenshot import capture_region, enhanced_screenshot, enhanced_screenshot_for_failure, enhanced_screenshot_for_year, take_screenshot
-from core.ocr import extract_text, extract_number, extract_turn_number, extract_failure_text, extract_failure_text_with_confidence
+from core.Ura.ocr import extract_text, extract_number, extract_turn_number, extract_failure_text, extract_failure_text_with_confidence
 from utils.recognizer import match_template, max_match_confidence
-from core.skill_auto_purchase import execute_skill_purchases, click_image_button, extract_skill_points
-from core.skill_recognizer import scan_all_skills_with_scroll
-from core.skill_purchase_optimizer import load_skill_config, create_purchase_plan, filter_affordable_skills
+from core.Ura.skill_auto_purchase import execute_skill_purchases, click_image_button, extract_skill_points
+from core.Ura.skill_recognizer import scan_all_skills_with_scroll
+from core.Ura.skill_purchase_optimizer import load_skill_config, create_purchase_plan, filter_affordable_skills
 
-from utils.constants_phone import (
+from utils.constants_ura import (
     SUPPORT_CARD_ICON_REGION, TURN_REGION, FAILURE_REGION, YEAR_REGION, 
     CRITERIA_REGION, SPD_REGION, STA_REGION, PWR_REGION, GUTS_REGION, WIT_REGION,
     SKILL_PTS_REGION, FAILURE_REGION_SPD, FAILURE_REGION_STA, FAILURE_REGION_PWR, FAILURE_REGION_GUTS, FAILURE_REGION_WIT
@@ -284,7 +284,7 @@ def check_skill_points(screenshot=None):
     
     # Cache the skill points for reuse in skill auto-purchase
     if result > 0:
-        from core.skill_auto_purchase import cache_skill_points
+        from core.Ura.skill_auto_purchase import cache_skill_points
         cache_skill_points(result)
     
     return result
@@ -416,7 +416,7 @@ def check_current_stats(screenshot=None):
     Returns:
         dict: Dictionary of current stats with keys: spd, sta, pwr, guts, wit
     """
-    from utils.constants_phone import SPD_REGION, STA_REGION, PWR_REGION, GUTS_REGION, WIT_REGION
+    from utils.constants_ura import SPD_REGION, STA_REGION, PWR_REGION, GUTS_REGION, WIT_REGION
     from utils.screenshot import take_screenshot
     import pytesseract
     from PIL import Image, ImageEnhance
